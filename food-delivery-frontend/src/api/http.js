@@ -1,4 +1,5 @@
 import axios from "axios";
+import { ElMessage } from "element-plus";
 import { useUserStore } from "@/stores/userStore";
 
 const http = axios.create({
@@ -15,7 +16,14 @@ http.interceptors.request.use((config) => {
 
 http.interceptors.response.use(
   (res) => res.data,
-  (error) => Promise.reject(error)
+  (error) => {
+    const msg = error.response?.data?.message || error.message || "请求失败";
+    ElMessage.error(msg);
+    if (error.response?.status === 401) {
+      useUserStore().logout();
+    }
+    return Promise.reject(error);
+  }
 );
 
 export default http;

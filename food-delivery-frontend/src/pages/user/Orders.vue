@@ -4,7 +4,7 @@
     <el-table :data="orders" style="width: 100%; margin-top: 16px">
       <el-table-column prop="id" label="订单号" width="80" />
       <el-table-column prop="status" label="状态" width="120" />
-      <el-table-column prop="totalAmount" label="金额" width="120" />
+      <el-table-column prop="amount" label="金额" width="120" />
       <el-table-column prop="createTime" label="下单时间" />
     </el-table>
   </div>
