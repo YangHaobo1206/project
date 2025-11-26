@@ -13,6 +13,11 @@ export const useUserStore = defineStore("user", {
       localStorage.setItem("token", token);
       this.fetchProfile();
     },
+    init() {
+      if (this.token && !this.profile) {
+        this.fetchProfile();
+      }
+    },
     async fetchProfile() {
       if (!this.token) return;
       const res = await getProfileApi();

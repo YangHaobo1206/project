@@ -3,6 +3,7 @@ import http from "./http";
 export const applyMerchantApi = (data) => http.post("/merchant/apply", data);
 export const getMyMerchantApi = () => http.get("/merchant/me");
 export const updateMyMerchantApi = (data) => http.put("/merchant/me", data);
+export const listApprovedMerchantsApi = () => http.get("/merchant");
 
 export const listPendingMerchantsApi = () => http.get("/admin/merchant/pending");
 export const approveMerchantApi = (id, pass) =>

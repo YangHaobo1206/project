@@ -22,10 +22,12 @@
 
 <script setup>
 import { ref } from "vue";
+import { useRouter } from "vue-router";
 import { ElMessage } from "element-plus";
 import { loginApi, registerApi } from "@/api/userApi";
 import { useUserStore } from "@/stores/userStore";
 
+const router = useRouter();
 const store = useUserStore();
 const loading = ref(false);
 const form = ref({
@@ -44,6 +46,7 @@ const handleLogin = async () => {
     if (res.code === 200) {
       store.setToken(res.data);
       ElMessage.success("登录成功");
+      router.push("/user/home");
     } else {
       ElMessage.error(res.msg || "登录失败");
     }
