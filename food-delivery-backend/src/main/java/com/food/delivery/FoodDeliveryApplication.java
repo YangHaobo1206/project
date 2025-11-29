@@ -1,11 +1,10 @@
 package com.food.delivery;
 
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
+import com.food.delivery.server.HttpJsonServer;
 
-@SpringBootApplication
 public class FoodDeliveryApplication {
     public static void main(String[] args) {
-        SpringApplication.run(FoodDeliveryApplication.class, args);
+        int port = 8080;
+        new HttpJsonServer(port).start();
     }
 }
