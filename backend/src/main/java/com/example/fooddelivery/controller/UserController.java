@@ -7,6 +7,7 @@ import com.example.fooddelivery.dto.UpdateUserRequest;
 import com.example.fooddelivery.entity.User;
 import com.example.fooddelivery.service.UserService;
 import jakarta.validation.Valid;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
@@ -40,11 +41,13 @@ public class UserController {
     }
 
     @GetMapping("/users")
+    @PreAuthorize("hasRole('ADMIN')")
     public ApiResponse<List<User>> list() {
         return ApiResponse.success(userService.findAll());
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ApiResponse<User> update(@PathVariable Long id, @RequestBody UpdateUserRequest request) {
         return ApiResponse.success(userService.update(id, request));
     }

@@ -1,5 +1,6 @@
 package com.example.fooddelivery.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
@@ -21,6 +22,7 @@ public class User {
     private String username;
 
     @NotBlank(message = "Password is required")
+    @JsonIgnore
     private String password;
 
     private String role;
