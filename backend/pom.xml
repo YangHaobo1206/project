@@ -20,9 +20,24 @@
 
     <repositories>
         <repository>
-            <id>aliyun-public</id>
-            <name>Aliyun Public Repository Mirror</name>
-            <url>https://maven.aliyun.com/repository/public</url>
+            <id>maven-central</id>
+            <name>Maven Central</name>
+            <url>https://repo1.maven.org/maven2/</url>
+        </repository>
+        <repository>
+            <id>maven-central-alt</id>
+            <name>Maven Central Alternate</name>
+            <url>https://repo.maven.apache.org/maven2/</url>
+        </repository>
+        <repository>
+            <id>tencent</id>
+            <name>Tencent Maven Mirror</name>
+            <url>https://mirrors.tencent.com/nexus/repository/maven-public/</url>
+        </repository>
+        <repository>
+            <id>huaweicloud</id>
+            <name>HuaweiCloud Maven Mirror</name>
+            <url>https://repo.huaweicloud.com/repository/maven/</url>
         </repository>
         <repository>
             <id>spring-release</id>
@@ -38,9 +53,14 @@
 
     <pluginRepositories>
         <pluginRepository>
-            <id>aliyun-public-plugins</id>
-            <name>Aliyun Public Plugins</name>
-            <url>https://maven.aliyun.com/repository/public</url>
+            <id>maven-central-plugins</id>
+            <name>Maven Central Plugins</name>
+            <url>https://repo1.maven.org/maven2/</url>
+        </pluginRepository>
+        <pluginRepository>
+            <id>maven-central-plugins-alt</id>
+            <name>Maven Central Plugins Alternate</name>
+            <url>https://repo.maven.apache.org/maven2/</url>
         </pluginRepository>
         <pluginRepository>
             <id>spring-plugins</id>
