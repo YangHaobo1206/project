@@ -30,11 +30,15 @@ public class DishServiceImpl implements DishService {
     }
 
     @Override
-    public Dish update(Long id, Dish dish) {
+    public Dish update(Long id, Dish dish, Long shopId) {
         Dish existing = dishRepository.findById(id).orElseThrow(() -> new BusinessException(404, "Dish not found"));
         existing.setName(dish.getName());
         existing.setCategory(dish.getCategory());
         existing.setPrice(dish.getPrice());
+        if (shopId != null) {
+            Shop shop = shopRepository.findById(shopId).orElseThrow(() -> new BusinessException(404, "Shop not found"));
+            existing.setShop(shop);
+        }
         return dishRepository.save(existing);
     }
 
@@ -48,5 +52,18 @@ public class DishServiceImpl implements DishService {
     @Override
     public List<Dish> listByShop(Long shopId) {
         return dishRepository.findByShopId(shopId);
+    }
+
+    @Override
+    public List<Dish> listAll() {
+        return dishRepository.findAll();
+    }
+
+    @Override
+    public void delete(Long id) {
+        if (!dishRepository.existsById(id)) {
+            throw new BusinessException(404, "Dish not found");
+        }
+        dishRepository.deleteById(id);
     }
 }

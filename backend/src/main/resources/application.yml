@@ -1,46 +1,26 @@
 spring:
   application:
     name: food-delivery-backend
+
   datasource:
-    url: jdbc:h2:mem:fooddb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
-    driver-class-name: org.h2.Driver
-    username: sa
-    password: password
+    url: jdbc:mysql://localhost:3306/food_delivery?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    username: root
+    password: root
+
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: none
     show-sql: true
     properties:
       hibernate:
         format_sql: true
-  h2:
-    console:
-      enabled: true
+        dialect: org.hibernate.dialect.MySQLDialect
 
 jwt:
-  secret: "replace-this-development-secret-please-change"
+  secret: this-is-a-long-default-secret-at-least-32-characters-long
   expiration: 3600000
 
 logging:
   level:
     com.example.fooddelivery: INFO
-
----
-spring:
-  config:
-    activate:
-      on-profile: prod
-  datasource:
-    url: jdbc:mysql://mysql:3306/food_delivery?useSSL=false&serverTimezone=UTC
-    driver-class-name: com.mysql.cj.jdbc.Driver
-    username: food
-    password: food
-  jpa:
-    hibernate:
-      ddl-auto: update
-    properties:
-      hibernate:
-        dialect: org.hibernate.dialect.MySQLDialect
-jwt:
-  secret: ${JWT_SECRET:change-me}
-  expiration: 3600000

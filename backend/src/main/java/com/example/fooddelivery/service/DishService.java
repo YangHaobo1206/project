@@ -6,7 +6,9 @@ import java.util.List;
 
 public interface DishService {
     Dish create(Dish dish, Long shopId);
-    Dish update(Long id, Dish dish);
+    Dish update(Long id, Dish dish, Long shopId);
     Dish toggleAvailability(Long id, boolean available);
     List<Dish> listByShop(Long shopId);
+    List<Dish> listAll();
+    void delete(Long id);
 }

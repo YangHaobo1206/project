@@ -28,4 +28,6 @@ public class User {
     private String role;
 
     private String phone;
+
+    private String address;
 }

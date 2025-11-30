@@ -52,6 +52,13 @@ public class UserController {
         return ApiResponse.success(userService.update(id, request));
     }
 
+    @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ApiResponse<Void> delete(@PathVariable Long id) {
+        userService.delete(id);
+        return ApiResponse.success(null);
+    }
+
     @PostMapping("/logout")
     public ApiResponse<Void> logout() {
         return ApiResponse.success(null);

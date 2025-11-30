@@ -40,6 +40,7 @@ public class UserServiceImpl implements UserService {
         user.setUsername(request.getUsername());
         user.setPassword(passwordEncoder.encode(request.getPassword()));
         user.setPhone(request.getPhone());
+        user.setAddress(request.getAddress());
         user.setRole("USER");
         return userRepository.save(user);
     }
@@ -56,6 +57,9 @@ public class UserServiceImpl implements UserService {
         if (request.getPhone() != null) {
             user.setPhone(request.getPhone());
         }
+        if (request.getAddress() != null) {
+            user.setAddress(request.getAddress());
+        }
         if (request.getRole() != null) {
             user.setRole(request.getRole());
         }
@@ -70,5 +74,13 @@ public class UserServiceImpl implements UserService {
     @Override
     public List<User> findAll() {
         return userRepository.findAll();
+    }
+
+    @Override
+    public void delete(Long id) {
+        if (!userRepository.existsById(id)) {
+            throw new BusinessException(404, "User not found");
+        }
+        userRepository.deleteById(id);
     }
 }

@@ -34,6 +34,9 @@ public class OrderServiceImpl implements OrderService {
         order.setShop(shop);
         order.setStatus("CREATED");
         order.setCreatedAt(LocalDateTime.now());
+        if (order.getTotalAmount() == null) {
+            order.setTotalAmount(java.math.BigDecimal.ZERO);
+        }
         return orderRepository.save(order);
     }
 
@@ -59,6 +62,13 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
+    public Order complete(Long orderId) {
+        Order order = orderRepository.findById(orderId).orElseThrow(() -> new BusinessException(404, "Order not found"));
+        order.setStatus("COMPLETED");
+        return orderRepository.save(order);
+    }
+
+    @Override
     public List<Order> findByUser(Long userId) {
         return orderRepository.findByUserId(userId);
     }
@@ -66,5 +76,23 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public List<Order> findByShop(Long shopId) {
         return orderRepository.findByShopId(shopId);
+    }
+
+    @Override
+    public List<Order> findAll() {
+        return orderRepository.findAll();
+    }
+
+    @Override
+    public void delete(Long orderId) {
+        if (!orderRepository.existsById(orderId)) {
+            throw new BusinessException(404, "Order not found");
+        }
+        orderRepository.deleteById(orderId);
+    }
+
+    @Override
+    public Order findById(Long orderId) {
+        return orderRepository.findById(orderId).orElseThrow(() -> new BusinessException(404, "Order not found"));
     }
 }

@@ -9,6 +9,10 @@ public interface OrderService {
     Order cancel(Long orderId);
     Order markPaid(Long orderId);
     Order accept(Long orderId);
+    Order complete(Long orderId);
     List<Order> findByUser(Long userId);
     List<Order> findByShop(Long shopId);
+    List<Order> findAll();
+    void delete(Long orderId);
+    Order findById(Long orderId);
 }

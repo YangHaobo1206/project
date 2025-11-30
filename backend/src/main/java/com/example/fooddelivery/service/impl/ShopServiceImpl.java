@@ -19,7 +19,7 @@ public class ShopServiceImpl implements ShopService {
 
     @Override
     public Shop create(Shop shop) {
-        shop.setOnline(false);
+        shop.setOnline(true);
         return shopRepository.save(shop);
     }
 
@@ -28,6 +28,7 @@ public class ShopServiceImpl implements ShopService {
         Shop existing = shopRepository.findById(id).orElseThrow(() -> new BusinessException(404, "Shop not found"));
         existing.setName(shop.getName());
         existing.setDescription(shop.getDescription());
+        existing.setAddress(shop.getAddress());
         return shopRepository.save(existing);
     }
 

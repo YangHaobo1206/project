@@ -17,5 +17,6 @@ public class Shop {
 
     private String name;
     private String description;
+    private String address;
     private boolean online;
 }
