@@ -1,0 +1,26 @@
+spring:
+  application:
+    name: food-delivery-backend
+
+  datasource:
+    url: jdbc:mysql://localhost:3306/food_delivery?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    username: root
+    password: root
+
+  jpa:
+    hibernate:
+      ddl-auto: none
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+        dialect: org.hibernate.dialect.MySQLDialect
+
+jwt:
+  secret: this-is-a-long-default-secret-at-least-32-characters-long
+  expiration: 3600000
+
+logging:
+  level:
+    com.example.fooddelivery: INFO
