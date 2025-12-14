@@ -24,3 +24,6 @@ jwt:
 logging:
   level:
     com.example.fooddelivery: INFO
+
+app:
+  upload-dir: backend/uploads/images

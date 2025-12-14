@@ -35,7 +35,13 @@ import http from '../api/http'
 
 const router = useRouter()
 const auth = useAuthStore()
-const form = reactive({ username: '', password: '', phone: '', address: '' })
+const form = reactive({
+  username: '',
+  password: '',
+  phone: '',
+  address: '',
+  role: 'USER'
+})
 
 const onSubmit = async () => {
   try {

@@ -43,20 +43,34 @@ public class OrderController {
     }
 
     @PostMapping("/{id}/pay")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ApiResponse<Order> pay(@PathVariable Long id) {
+    public ApiResponse<Order> pay(@PathVariable Long id, Authentication authentication) {
+        Order target = orderService.findById(id);
+        boolean isAdmin = authentication.getAuthorities().stream().map(GrantedAuthority::getAuthority).anyMatch(r -> r.equals("ROLE_ADMIN"));
+        if (!isAdmin && (target.getUser() == null || !authentication.getName().equals(target.getUser().getUsername()))) {
+            throw new BusinessException(403, "无权限支付该订单");
+        }
         return ApiResponse.success(orderService.markPaid(id));
     }
 
     @PostMapping("/{id}/accept")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ApiResponse<Order> accept(@PathVariable Long id) {
+    @PreAuthorize("hasAnyRole('ADMIN','MERCHANT')")
+    public ApiResponse<Order> accept(@PathVariable Long id, Authentication authentication) {
+        Order target = orderService.findById(id);
+        boolean isAdmin = authentication.getAuthorities().stream().map(GrantedAuthority::getAuthority).anyMatch(r -> r.equals("ROLE_ADMIN"));
+        if (!isAdmin && !isOrderOwnerShop(authentication, target)) {
+            throw new BusinessException(403, "无权限操作该订单");
+        }
         return ApiResponse.success(orderService.accept(id));
     }
 
     @PostMapping("/{id}/complete")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ApiResponse<Order> complete(@PathVariable Long id) {
+    @PreAuthorize("hasAnyRole('ADMIN','MERCHANT')")
+    public ApiResponse<Order> complete(@PathVariable Long id, Authentication authentication) {
+        Order target = orderService.findById(id);
+        boolean isAdmin = authentication.getAuthorities().stream().map(GrantedAuthority::getAuthority).anyMatch(r -> r.equals("ROLE_ADMIN"));
+        if (!isAdmin && !isOrderOwnerShop(authentication, target)) {
+            throw new BusinessException(403, "无权限操作该订单");
+        }
         return ApiResponse.success(orderService.complete(id));
     }
 
@@ -83,6 +97,26 @@ public class OrderController {
     @PreAuthorize("hasRole('ADMIN')")
     public ApiResponse<List<Order>> byShop(@PathVariable Long shopId) {
         return ApiResponse.success(orderService.findByShop(shopId));
+    }
+
+    @GetMapping("/shop/mine")
+    @PreAuthorize("hasAnyRole('ADMIN','MERCHANT')")
+    public ApiResponse<List<Order>> myShopOrders(Authentication authentication) {
+        boolean isAdmin = authentication.getAuthorities().stream().map(GrantedAuthority::getAuthority).anyMatch(r -> r.equals("ROLE_ADMIN"));
+        if (isAdmin) {
+            return ApiResponse.success(orderService.findAll());
+        }
+        Long uid = userService.findByUsername(authentication.getName())
+                .orElseThrow(() -> new RuntimeException("User not found"))
+                .getId();
+        return ApiResponse.success(orderService.findByShopOwner(uid));
+    }
+
+    private boolean isOrderOwnerShop(Authentication authentication, Order order) {
+        if (order == null || order.getShop() == null || order.getShop().getOwner() == null) {
+            return false;
+        }
+        return authentication.getName().equals(order.getShop().getOwner().getUsername());
     }
 
     @GetMapping("/my")

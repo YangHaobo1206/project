@@ -30,6 +30,12 @@ public class OrderServiceImpl implements OrderService {
     public Order placeOrder(Order order, Long userId, Long shopId) {
         User user = userRepository.findById(userId).orElseThrow(() -> new BusinessException(404, "User not found"));
         Shop shop = shopRepository.findById(shopId).orElseThrow(() -> new BusinessException(404, "Shop not found"));
+        if (!"APPROVED".equals(shop.getStatus())) {
+            throw new BusinessException(400, "店铺未通过审核，暂不可下单");
+        }
+        if (!shop.isOnline()) {
+            throw new BusinessException(400, "店铺未营业");
+        }
         order.setUser(user);
         order.setShop(shop);
         order.setStatus("CREATED");
@@ -76,6 +82,16 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public List<Order> findByShop(Long shopId) {
         return orderRepository.findByShopId(shopId);
+    }
+
+    @Override
+    public List<Order> findByShopOwner(Long ownerId) {
+        var shops = shopRepository.findByOwnerId(ownerId);
+        if (shops == null || shops.isEmpty()) {
+            return List.of();
+        }
+        var shopIds = shops.stream().map(Shop::getId).toList();
+        return orderRepository.findByShopIdIn(shopIds);
     }
 
     @Override

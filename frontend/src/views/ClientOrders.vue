@@ -1,21 +1,16 @@
 <template>
-  <section class="client-card glass-card">
-    <header class="card-header">
-      <div>
-        <h2>我的订单</h2>
-        <p class="muted">查看近期订单及状态</p>
-      </div>
-      <el-button size="small" class="btn-soft" @click="refresh" :loading="loading">刷新</el-button>
-    </header>
+  <PageContainer title="我的订单" subtitle="查看近期订单及状态">
+    <template #actions>
+      <el-button size="small" class="btn-soft" :loading="loading" @click="refresh">刷新</el-button>
+    </template>
 
     <div v-if="loading" class="placeholder">加载中...</div>
     <div v-else-if="client.orders.length === 0" class="placeholder">暂无订单</div>
     <el-table
       v-else
       :data="client.orders"
-      class="glass-card"
-      style="width: 100%; background: transparent;"
-      :header-cell-style="{ background: 'transparent' }"
+      class="page-table"
+      border
     >
       <el-table-column prop="id" label="ID" width="80" />
       <el-table-column label="商家">
@@ -25,22 +20,34 @@
       </el-table-column>
       <el-table-column label="金额" width="140">
         <template #default="scope">
-          ￥{{ Number(scope.row.totalAmount || 0).toFixed(2) }}
+          ¥{{ Number(scope.row.totalAmount || 0).toFixed(2) }}
         </template>
       </el-table-column>
-      <el-table-column label="状态" width="140">
+      <el-table-column label="状态" width="220">
         <template #default="scope">
           <el-tag :type="statusType(scope.row.status)">{{ statusText(scope.row.status) }}</el-tag>
+          <el-button
+            v-if="scope.row.status === 'CREATED'"
+            size="small"
+            type="primary"
+            link
+            @click="pay(scope.row)"
+          >
+            去支付
+          </el-button>
         </template>
       </el-table-column>
       <el-table-column prop="createdAt" label="时间" />
     </el-table>
-  </section>
+  </PageContainer>
 </template>
 
 <script setup>
 import { computed, onMounted } from 'vue'
+import { ElMessage } from 'element-plus'
+import PageContainer from '../components/PageContainer.vue'
 import { useClientStore } from '../store/client'
+import http from '../api/http'
 
 const client = useClientStore()
 const loading = computed(() => client.loadingOrders)
@@ -77,6 +84,16 @@ const statusType = (val) => {
   }
 }
 
+const pay = async (row) => {
+  try {
+    await http.post(`/api/orders/${row.id}/pay`)
+    ElMessage.success('支付成功')
+    await client.loadOrders()
+  } catch (e) {
+    ElMessage.error(e?.message || '支付失败')
+  }
+}
+
 onMounted(async () => {
   if (!client.orders.length) {
     await client.loadOrders()
@@ -85,30 +102,13 @@ onMounted(async () => {
 </script>
 
 <style scoped>
-.client-card {
-  padding: 16px;
-}
-
-.card-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 12px;
-}
-
-.card-header h2 {
-  margin: 0 0 4px;
-}
-
-.muted {
-  margin: 0;
-  color: var(--text-muted);
-}
-
 .placeholder {
   padding: 24px;
   text-align: center;
   color: var(--text-muted);
+}
+
+.page-table :deep(.el-table__cell) {
+  padding: 10px 8px;
 }
 </style>

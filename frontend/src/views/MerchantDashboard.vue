@@ -4,21 +4,20 @@
       <div class="nav-brand">
         <div class="nav-dot" />
         <div>
-          <div class="nav-title">点餐中心</div>
-          <div class="nav-sub">Client</div>
+          <div class="nav-title">商家中心</div>
+          <div class="nav-sub">Merchant</div>
         </div>
       </div>
       <nav class="nav-menu">
-        <RouterLink :class="['side-link', { active: isActive('/client/shops') }]" to="/client/shops">商家</RouterLink>
-        <RouterLink :class="['side-link', { active: isActive('/client/dishes') }]" to="/client/dishes">菜品</RouterLink>
-        <RouterLink :class="['side-link', { active: isActive('/client/orders') }]" to="/client/orders">我的订单</RouterLink>
-        <RouterLink :class="['side-link', { active: isActive('/client/profile') }]" to="/client/profile">我的信息</RouterLink>
+        <RouterLink :class="['side-link', { active: isActive('/merchant/dashboard') }]" to="/merchant/dashboard">数据大屏</RouterLink>
+        <RouterLink :class="['side-link', { active: isActive('/merchant/dishes') }]" to="/merchant/dishes">菜品管理</RouterLink>
+        <RouterLink :class="['side-link', { active: isActive('/merchant/orders') }]" to="/merchant/orders">订单管理</RouterLink>
       </nav>
     </aside>
 
     <section class="shell-main">
       <header class="shell-topbar">
-        <div class="topbar-title">用户端</div>
+        <div class="topbar-title">商家端</div>
         <div class="topbar-actions">
           <el-button size="small" text @click="logout">退出登录</el-button>
         </div>

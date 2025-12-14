@@ -5,6 +5,8 @@ import com.example.fooddelivery.entity.Order;
 import com.example.fooddelivery.entity.Shop;
 import com.example.fooddelivery.service.OrderService;
 import com.example.fooddelivery.service.ShopService;
+import com.example.fooddelivery.service.UserService;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
@@ -16,10 +18,12 @@ public class ShopController {
 
     private final ShopService shopService;
     private final OrderService orderService;
+    private final UserService userService;
 
-    public ShopController(ShopService shopService, OrderService orderService) {
+    public ShopController(ShopService shopService, OrderService orderService, UserService userService) {
         this.shopService = shopService;
         this.orderService = orderService;
+        this.userService = userService;
     }
 
     @PostMapping
@@ -28,9 +32,29 @@ public class ShopController {
         return ApiResponse.success(shopService.create(shop));
     }
 
+    @PostMapping("/{id}/approve")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ApiResponse<Shop> approve(@PathVariable Long id) {
+        return ApiResponse.success(shopService.approve(id));
+    }
+
+    @PostMapping("/{id}/reject")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ApiResponse<Shop> reject(@PathVariable Long id) {
+        return ApiResponse.success(shopService.reject(id));
+    }
+
     @GetMapping
     public ApiResponse<List<Shop>> list() {
         return ApiResponse.success(shopService.findAll());
+    }
+
+    @GetMapping("/mine")
+    @PreAuthorize("hasAnyRole('MERCHANT','ADMIN')")
+    public ApiResponse<List<Shop>> mine(Authentication authentication) {
+        Long uid = userService.findByUsername(authentication.getName())
+                .orElseThrow(() -> new RuntimeException("User not found")).getId();
+        return ApiResponse.success(shopService.findByOwner(uid));
     }
 
     @PutMapping("/{id}")
@@ -47,15 +71,21 @@ public class ShopController {
     }
 
     @PostMapping("/{id}/online")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ApiResponse<Shop> goOnline(@PathVariable Long id) {
-        return ApiResponse.success(shopService.toggleOnline(id, true));
+    @PreAuthorize("hasAnyRole('ADMIN','MERCHANT')")
+    public ApiResponse<Shop> goOnline(@PathVariable Long id, Authentication authentication) {
+        Long uid = userService.findByUsername(authentication.getName())
+                .orElseThrow(() -> new RuntimeException("User not found")).getId();
+        boolean isAdmin = authentication.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+        return ApiResponse.success(shopService.toggleOnline(id, true, uid, isAdmin));
     }
 
     @PostMapping("/{id}/offline")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ApiResponse<Shop> goOffline(@PathVariable Long id) {
-        return ApiResponse.success(shopService.toggleOnline(id, false));
+    @PreAuthorize("hasAnyRole('ADMIN','MERCHANT')")
+    public ApiResponse<Shop> goOffline(@PathVariable Long id, Authentication authentication) {
+        Long uid = userService.findByUsername(authentication.getName())
+                .orElseThrow(() -> new RuntimeException("User not found")).getId();
+        boolean isAdmin = authentication.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+        return ApiResponse.success(shopService.toggleOnline(id, false, uid, isAdmin));
     }
 
     @GetMapping("/{id}/orders")

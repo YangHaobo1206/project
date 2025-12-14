@@ -11,4 +11,11 @@ public class RegisterRequest {
     private String password;
     private String phone;
     private String address;
+    /**
+     * USER 或 MERCHANT，默认 USER
+     */
+    private String role;
+    private String shopName;
+    private String shopDescription;
+    private String shopAddress;
 }

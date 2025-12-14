@@ -1,5 +1,6 @@
 package com.example.fooddelivery.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -19,4 +20,20 @@ public class Shop {
     private String description;
     private String address;
     private boolean online;
+
+    /**
+     * 店铺状态：PENDING（待审核）、APPROVED（已通过）、REJECTED（拒绝）
+     */
+    private String status;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+    private User owner;
+
+    @PrePersist
+    public void prePersist() {
+        if (status == null) {
+            status = owner == null ? "APPROVED" : "PENDING";
+        }
+    }
 }

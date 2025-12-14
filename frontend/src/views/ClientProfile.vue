@@ -1,12 +1,5 @@
 <template>
-  <section class="client-card glass-card">
-    <header class="card-header">
-      <div>
-        <h2>个人中心</h2>
-        <p class="muted">查看当前登录账号信息</p>
-      </div>
-    </header>
-
+  <PageContainer title="个人中心" subtitle="查看当前登录账号信息">
     <div class="info-list">
       <div class="info-row">
         <span class="label">用户名</span>
@@ -25,11 +18,12 @@
         <span class="value">{{ user?.address || '未填写' }}</span>
       </div>
     </div>
-  </section>
+  </PageContainer>
 </template>
 
 <script setup>
 import { computed } from 'vue'
+import PageContainer from '../components/PageContainer.vue'
 import { useAuthStore } from '../store/auth'
 
 const auth = useAuthStore()
@@ -37,27 +31,6 @@ const user = computed(() => auth.user)
 </script>
 
 <style scoped>
-.client-card {
-  padding: 16px;
-}
-
-.card-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 16px;
-}
-
-.card-header h2 {
-  margin: 0 0 4px;
-}
-
-.muted {
-  margin: 0;
-  color: var(--text-muted);
-}
-
 .info-list {
   display: grid;
   gap: 12px;
@@ -68,9 +41,9 @@ const user = computed(() => auth.user)
   justify-content: space-between;
   align-items: center;
   padding: 10px 12px;
-  border: 1px solid rgba(236, 155, 52, 0.2);
+  border: 1px solid var(--card-border);
   border-radius: 10px;
-  background: rgba(255, 248, 224, 0.7);
+  background: #f8fafc;
 }
 
 .label {

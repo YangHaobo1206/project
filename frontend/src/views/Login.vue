@@ -51,7 +51,9 @@ const onSubmit = async () => {
     const user = await http.get('/api/auth/me')
     auth.setAuth({ token, user })
     if (user?.role === 'ADMIN') {
-      router.push('/admin/users')
+      router.push('/admin/dashboard')
+    } else if (user?.role === 'MERCHANT') {
+      router.push('/merchant/dashboard')
     } else {
       router.push('/client/shops')
     }

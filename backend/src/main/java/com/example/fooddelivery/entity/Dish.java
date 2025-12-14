@@ -22,6 +22,7 @@ public class Dish {
     private String category;
     private BigDecimal price;
     private boolean available;
+    private String imageUrl;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})

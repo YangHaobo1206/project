@@ -1,44 +1,54 @@
-﻿<template>
-  <el-container class="admin-shell">
-    <el-aside width="220px" class="side glass-card">
-      <div class="brand">
-        <div class="brand-dot" />
+<template>
+  <div class="app-shell">
+    <aside class="shell-nav">
+      <div class="nav-brand">
+        <div class="nav-dot" />
         <div>
-          <div class="brand-title">美食外卖</div>
-          <div class="brand-sub">Admin Panel</div>
+          <div class="nav-title">外卖平台</div>
+          <div class="nav-sub">Admin</div>
         </div>
       </div>
       <el-menu
         router
-        class="menu-compact"
+        class="nav-menu"
+        :default-active="activePath"
         background-color="transparent"
         text-color="var(--text-muted)"
         active-text-color="var(--accent)"
       >
+        <el-menu-item index="/admin/dashboard">数据大屏</el-menu-item>
         <el-menu-item index="/admin/users">用户管理</el-menu-item>
         <el-menu-item index="/admin/shops">商家管理</el-menu-item>
         <el-menu-item index="/admin/dishes">菜品管理</el-menu-item>
         <el-menu-item index="/admin/orders">订单管理</el-menu-item>
+        <el-menu-item index="/admin/carousels">轮播图管理</el-menu-item>
       </el-menu>
-    </el-aside>
-    <el-container>
-      <el-header class="page-header glass-card">
-        <div class="welcome">欢迎登录后台</div>
-        <el-button class="btn-soft" @click="onLogout">退出登录</el-button>
-      </el-header>
-      <el-main class="main">
-        <router-view />
-      </el-main>
-    </el-container>
-  </el-container>
+    </aside>
+    <div class="shell-main">
+      <header class="shell-topbar">
+        <div class="topbar-title">后台管理</div>
+        <div class="topbar-actions">
+          <el-button size="small" text @click="onLogout">退出登录</el-button>
+        </div>
+      </header>
+      <main class="shell-content">
+        <div class="content-boundary">
+          <router-view />
+        </div>
+      </main>
+    </div>
+  </div>
 </template>
 
 <script setup>
-import { useRouter } from 'vue-router'
+import { computed } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from '../store/auth'
 
+const route = useRoute()
 const router = useRouter()
 const auth = useAuthStore()
+const activePath = computed(() => (route.path.startsWith('/admin') ? route.path : '/admin/dashboard'))
 
 const onLogout = () => {
   auth.logout()
@@ -47,56 +57,21 @@ const onLogout = () => {
 </script>
 
 <style scoped>
-.admin-shell {
-  height: 100vh;
-  color: var(--text-primary);
+.nav-menu {
+  flex: 1;
 }
 
-.side {
-  padding: 16px 12px;
+.nav-menu :deep(.el-menu-item) {
+  border-radius: 10px;
+  margin: 2px 4px;
 }
 
-.brand {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 12px;
-  margin-bottom: 8px;
+.nav-menu :deep(.el-menu-item.is-active) {
+  background: #eef2ff;
+  color: var(--accent);
 }
 
-.brand-dot {
-  width: 14px;
-  height: 14px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, #f59e0b, #fb7185);
-  box-shadow: 0 0 18px rgba(250, 159, 21, 0.6);
-}
-
-.brand-title {
-  font-weight: 700;
-  color: var(--text-primary);
-}
-
-.brand-sub {
-  font-size: 12px;
-  color: var(--text-muted);
-}
-
-.page-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 12px 20px;
-  margin: 12px 0 0;
-  background: rgba(255, 245, 230, 0.9);
-}
-
-.welcome {
+.topbar-title {
   font-weight: 600;
-}
-
-.main {
-  padding: 20px;
-  background: transparent;
 }
 </style>

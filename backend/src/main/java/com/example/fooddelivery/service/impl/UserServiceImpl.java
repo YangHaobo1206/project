@@ -5,9 +5,11 @@ import com.example.fooddelivery.dto.RegisterRequest;
 import com.example.fooddelivery.dto.UpdateUserRequest;
 import com.example.fooddelivery.entity.User;
 import com.example.fooddelivery.exception.BusinessException;
+import com.example.fooddelivery.entity.Shop;
 import com.example.fooddelivery.repository.UserRepository;
 import com.example.fooddelivery.service.UserService;
 import com.example.fooddelivery.util.JwtUtil;
+import com.example.fooddelivery.service.ShopService;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -23,12 +25,14 @@ public class UserServiceImpl implements UserService {
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
     private final AuthenticationManager authenticationManager;
+    private final ShopService shopService;
 
-    public UserServiceImpl(UserRepository userRepository, PasswordEncoder passwordEncoder, JwtUtil jwtUtil, AuthenticationManager authenticationManager) {
+    public UserServiceImpl(UserRepository userRepository, PasswordEncoder passwordEncoder, JwtUtil jwtUtil, AuthenticationManager authenticationManager, ShopService shopService) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtUtil = jwtUtil;
         this.authenticationManager = authenticationManager;
+        this.shopService = shopService;
     }
 
     @Override
@@ -41,8 +45,23 @@ public class UserServiceImpl implements UserService {
         user.setPassword(passwordEncoder.encode(request.getPassword()));
         user.setPhone(request.getPhone());
         user.setAddress(request.getAddress());
-        user.setRole("USER");
-        return userRepository.save(user);
+        String role = request.getRole() != null ? request.getRole().toUpperCase() : "USER";
+        if ("MERCHANT".equals(role)) {
+            if (request.getShopName() == null || request.getShopAddress() == null) {
+                throw new BusinessException(400, "商家注册需要提供店铺名称与地址");
+            }
+        }
+        user.setRole(role);
+        User saved = userRepository.save(user);
+
+        if ("MERCHANT".equals(role)) {
+            Shop shop = new Shop();
+            shop.setName(request.getShopName());
+            shop.setDescription(request.getShopDescription());
+            shop.setAddress(request.getShopAddress());
+            shopService.createForMerchant(shop, saved.getId());
+        }
+        return saved;
     }
 
     @Override

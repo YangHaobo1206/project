@@ -6,10 +6,12 @@ export const useClientStore = defineStore('client', () => {
   const shops = ref([])
   const dishes = ref([])
   const orders = ref([])
+  const carousels = ref([])
 
   const loadingShops = ref(false)
   const loadingDishes = ref(false)
   const loadingOrders = ref(false)
+  const loadingCarousels = ref(false)
 
   const selectedShopId = ref(localStorage.getItem('selectedShopId') || '')
 
@@ -25,7 +27,8 @@ export const useClientStore = defineStore('client', () => {
   const loadShops = async () => {
     loadingShops.value = true
     try {
-      shops.value = await http.get('/api/shops')
+      const data = await http.get('/api/shops')
+      shops.value = (data || []).filter((s) => s.status === 'APPROVED' && s.online)
       if (!selectedShopId.value && shops.value.length) {
         setSelectedShop(shops.value[0].id)
       }
@@ -37,7 +40,10 @@ export const useClientStore = defineStore('client', () => {
   const loadDishes = async () => {
     loadingDishes.value = true
     try {
-      dishes.value = await http.get('/api/dishes')
+      const data = await http.get('/api/dishes')
+      dishes.value = (data || []).filter(
+        (d) => d.available && d.shop?.status === 'APPROVED' && d.shop?.online
+      )
     } finally {
       loadingDishes.value = false
     }
@@ -56,19 +62,31 @@ export const useClientStore = defineStore('client', () => {
     return http.post('/api/orders', { totalAmount }, { params: { shopId } })
   }
 
+  const loadCarousels = async () => {
+    loadingCarousels.value = true
+    try {
+      carousels.value = await http.get('/api/carousels/public')
+    } finally {
+      loadingCarousels.value = false
+    }
+  }
+
   return {
     shops,
     dishes,
     orders,
+    carousels,
     loadingShops,
     loadingDishes,
     loadingOrders,
+    loadingCarousels,
     selectedShopId,
     currentShop,
     setSelectedShop,
     loadShops,
     loadDishes,
     loadOrders,
+    loadCarousels,
     placeOrder
   }
 })

@@ -19,21 +19,21 @@ public class DataInitializer {
             if (userRepository.findByUsername("admin").isEmpty()) {
                 User admin = new User();
                 admin.setUsername("admin");
-                admin.setPassword(passwordEncoder.encode("Admin123!"));
+                admin.setPassword(passwordEncoder.encode("admin"));
                 admin.setRole("ADMIN");
                 admin.setPhone("18800000000");
                 userRepository.save(admin);
-                log.info("Seeded default admin user: admin / Admin123!");
+                log.info("Seeded default admin user: admin / admin");
             }
 
             if (userRepository.findByUsername("demo").isEmpty()) {
                 User demo = new User();
                 demo.setUsername("demo");
-                demo.setPassword(passwordEncoder.encode("Demo123!"));
+                demo.setPassword(passwordEncoder.encode("demo"));
                 demo.setRole("USER");
                 demo.setPhone("17700000000");
                 userRepository.save(demo);
-                log.info("Seeded demo user: demo / Demo123!");
+                log.info("Seeded demo user: demo / demo");
             }
         };
     }

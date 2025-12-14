@@ -1,65 +1,57 @@
-﻿<template>
-  <div>
-    <el-card class="glass-card page-card">
-      <template #header>
-        <div class="header-bar sticky-bar">
-          <div class="section-title">
-            <span>用户管理</span>
-            <small>账号、角色与联系方式</small>
-          </div>
-          <div class="actions">
-            <el-button type="primary" @click="openCreate">新增用户</el-button>
-            <el-button class="btn-soft" @click="load">刷新</el-button>
-          </div>
-        </div>
-      </template>
-      <el-table :data="users" style="width: 100%" :loading="loading">
-        <el-table-column prop="id" label="ID" width="80" />
-        <el-table-column prop="username" label="用户名" />
-        <el-table-column prop="phone" label="电话" />
-        <el-table-column prop="address" label="收货地址" />
-        <el-table-column prop="role" label="角色" />
-        <el-table-column label="操作" width="200">
-          <template #default="scope">
-            <el-button size="small" @click="openEdit(scope.row)">编辑</el-button>
-            <el-button size="small" type="danger" @click="remove(scope.row)">删除</el-button>
-          </template>
-        </el-table-column>
-      </el-table>
-    </el-card>
+<template>
+  <PageContainer title="用户管理" subtitle="账号、角色与联系方式">
+    <template #actions>
+      <el-button type="primary" size="small" @click="openCreate">新增用户</el-button>
+      <el-button size="small" class="btn-soft" @click="load">刷新</el-button>
+    </template>
+    <el-table :data="users" class="page-table" :loading="loading" border>
+      <el-table-column prop="id" label="ID" width="80" />
+      <el-table-column prop="username" label="用户名" />
+      <el-table-column prop="phone" label="电话" />
+      <el-table-column prop="address" label="收货地址" />
+      <el-table-column prop="role" label="角色" />
+      <el-table-column label="操作" width="200">
+        <template #default="scope">
+          <el-button size="small" @click="openEdit(scope.row)">编辑</el-button>
+          <el-button size="small" type="danger" @click="remove(scope.row)">删除</el-button>
+        </template>
+      </el-table-column>
+    </el-table>
+  </PageContainer>
 
-    <el-dialog v-model="dialogVisible" :title="form.id ? '编辑用户' : '新增用户'" width="420px">
-      <el-form :model="form" label-width="90px">
-        <el-form-item label="用户名" required>
-          <el-input v-model="form.username" :disabled="!!form.id" />
-        </el-form-item>
-        <el-form-item v-if="!form.id" label="密码" required>
-          <el-input v-model="form.password" type="password" placeholder="至少6位" />
-        </el-form-item>
-        <el-form-item label="电话">
-          <el-input v-model="form.phone" />
-        </el-form-item>
-        <el-form-item label="收货地址">
-          <el-input v-model="form.address" />
-        </el-form-item>
-        <el-form-item label="角色">
-          <el-select v-model="form.role" placeholder="选择角色">
-            <el-option label="管理员" value="ADMIN" />
-            <el-option label="普通用户" value="USER" />
-          </el-select>
-        </el-form-item>
-      </el-form>
-      <template #footer>
-        <el-button @click="dialogVisible = false">取消</el-button>
-        <el-button type="primary" :loading="saving" @click="save">保存</el-button>
-      </template>
-    </el-dialog>
-  </div>
+  <el-dialog v-model="dialogVisible" :title="form.id ? '编辑用户' : '新增用户'" width="420px">
+    <el-form :model="form" label-width="90px">
+      <el-form-item label="用户名" required>
+        <el-input v-model="form.username" :disabled="!!form.id" />
+      </el-form-item>
+      <el-form-item v-if="!form.id" label="密码" required>
+        <el-input v-model="form.password" type="password" placeholder="至少6位" />
+      </el-form-item>
+      <el-form-item label="电话">
+        <el-input v-model="form.phone" />
+      </el-form-item>
+      <el-form-item label="收货地址">
+        <el-input v-model="form.address" />
+      </el-form-item>
+      <el-form-item label="角色">
+        <el-select v-model="form.role" placeholder="选择角色">
+          <el-option label="管理员" value="ADMIN" />
+          <el-option label="普通用户" value="USER" />
+          <el-option label="商家" value="MERCHANT" />
+        </el-select>
+      </el-form-item>
+    </el-form>
+    <template #footer>
+      <el-button @click="dialogVisible = false">取消</el-button>
+      <el-button type="primary" :loading="saving" @click="save">保存</el-button>
+    </template>
+  </el-dialog>
 </template>
 
 <script setup>
 import { onMounted, reactive, ref } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
+import PageContainer from '../components/PageContainer.vue'
 import http from '../api/http'
 
 const users = ref([])
@@ -118,6 +110,10 @@ const save = async () => {
     ElMessage.warning('请填写密码')
     return
   }
+  if (!form.id && form.role === 'MERCHANT') {
+    ElMessage.warning('商家请通过注册流程创建以便提交店铺审核信息')
+    return
+  }
 
   saving.value = true
   try {
@@ -155,3 +151,9 @@ const remove = async (row) => {
 
 onMounted(load)
 </script>
+
+<style scoped>
+.page-table :deep(.el-table__cell) {
+  padding: 10px 8px;
+}
+</style>
