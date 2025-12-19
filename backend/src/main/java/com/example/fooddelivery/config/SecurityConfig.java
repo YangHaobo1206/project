@@ -20,6 +20,7 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
+import java.util.Arrays;
 import java.util.List;
 
 @Configuration
@@ -40,9 +41,22 @@ public class SecurityConfig {
             return org.springframework.security.core.userdetails.User.builder()
                     .username(user.getUsername())
                     .password(user.getPassword())
-                    .roles(user.getRole() == null ? "USER" : user.getRole())
+                    .roles(resolveRoles(user))
                     .build();
         };
+    }
+
+    private String[] resolveRoles(User user) {
+        String roleString = user.getRole();
+        if (roleString == null || roleString.isBlank()) {
+            return new String[]{"USER"};
+        }
+        String[] roles = Arrays.stream(roleString.split(","))
+                .map(String::trim)
+                .filter(r -> !r.isEmpty())
+                .map(r -> r.toUpperCase().replaceFirst("^ROLE_", ""))
+                .toArray(String[]::new);
+        return roles.length == 0 ? new String[]{"USER"} : roles;
     }
 
     @Bean

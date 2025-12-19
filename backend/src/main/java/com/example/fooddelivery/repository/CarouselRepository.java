@@ -16,4 +16,6 @@ public interface CarouselRepository extends JpaRepository<Carousel, Long> {
     long countByStatus(String status);
 
     Optional<Carousel> findFirstByDishIdAndStatusIn(Long dishId, List<String> statuses);
+
+    Optional<Carousel> findFirstByShop_IdAndDish_Id(Long shopId, Long dishId);
 }

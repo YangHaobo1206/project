@@ -45,7 +45,7 @@ public class UserServiceImpl implements UserService {
         user.setPassword(passwordEncoder.encode(request.getPassword()));
         user.setPhone(request.getPhone());
         user.setAddress(request.getAddress());
-        String role = request.getRole() != null ? request.getRole().toUpperCase() : "USER";
+        String role = normalizeRole(request.getRole());
         if ("MERCHANT".equals(role)) {
             if (request.getShopName() == null || request.getShopAddress() == null) {
                 throw new BusinessException(400, "商家注册需要提供店铺名称与地址");
@@ -80,7 +80,7 @@ public class UserServiceImpl implements UserService {
             user.setAddress(request.getAddress());
         }
         if (request.getRole() != null) {
-            user.setRole(request.getRole());
+            user.setRole(normalizeRole(request.getRole()));
         }
         return userRepository.save(user);
     }
@@ -101,5 +101,16 @@ public class UserServiceImpl implements UserService {
             throw new BusinessException(404, "User not found");
         }
         userRepository.deleteById(id);
+    }
+
+    private String normalizeRole(String role) {
+        if (role == null || role.isBlank()) {
+            return "USER";
+        }
+        String cleaned = role.toUpperCase();
+        if (cleaned.startsWith("ROLE_")) {
+            cleaned = cleaned.substring(5);
+        }
+        return cleaned;
     }
 }

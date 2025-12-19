@@ -4,6 +4,7 @@ import com.example.fooddelivery.entity.Carousel;
 import com.example.fooddelivery.entity.Dish;
 import com.example.fooddelivery.entity.Shop;
 import com.example.fooddelivery.entity.User;
+import com.example.fooddelivery.exception.BusinessException;
 import com.example.fooddelivery.repository.CarouselRepository;
 import com.example.fooddelivery.repository.DishRepository;
 import com.example.fooddelivery.repository.ShopRepository;
@@ -47,21 +48,45 @@ public class CarouselServiceImpl implements CarouselService {
     @Override
     @Transactional
     public Carousel apply(Long shopId, Long dishId, Long ownerId) {
-        Shop shop = shopRepository.findById(shopId).orElseThrow(() -> new RuntimeException("店铺不存在"));
+        Shop shop = shopRepository.findById(shopId).orElseThrow(() -> new BusinessException(404, "Shop not found"));
         if (shop.getOwner() == null || !shop.getOwner().getId().equals(ownerId)) {
-            throw new RuntimeException("只能提交自己店铺的菜品");
+            throw new BusinessException(403, "Only allowed to submit carousel for your own shop");
         }
         if (!"APPROVED".equalsIgnoreCase(shop.getStatus())) {
-            throw new RuntimeException("店铺未通过审核，无法申请轮播");
+            throw new BusinessException(400, "Shop not approved, cannot apply carousel");
         }
-        Dish dish = dishRepository.findById(dishId).orElseThrow(() -> new RuntimeException("菜品不存在"));
+        Dish dish = dishRepository.findById(dishId).orElseThrow(() -> new BusinessException(404, "Dish not found"));
         if (!dish.getShop().getId().equals(shopId)) {
-            throw new RuntimeException("菜品不属于该店铺");
+            throw new BusinessException(400, "Dish does not belong to this shop");
         }
-        // 防止重复申请或重复通过
+
+        Carousel existing = carouselRepository.findFirstByShop_IdAndDish_Id(shopId, dishId).orElse(null);
+        if (existing != null) {
+            String status = existing.getStatus() == null ? "" : existing.getStatus().trim().toUpperCase();
+            if ("REJECTED".equals(status) || "STOPPED".equals(status)) {
+                existing.setStatus("PENDING");
+                existing.setReviewer(null);
+                existing.setReviewedAt(null);
+                existing.setImageUrl(dish.getImageUrl());
+                existing.setUpdatedAt(LocalDateTime.now());
+                return carouselRepository.save(existing);
+            }
+            if ("PENDING".equals(status) || "APPROVED".equals(status)) {
+                throw new BusinessException(400, "This dish has already been submitted or is currently playing");
+            }
+            // For any other historical status, re-queue to avoid unique constraint collisions
+            existing.setStatus("PENDING");
+            existing.setReviewer(null);
+            existing.setReviewedAt(null);
+            existing.setImageUrl(dish.getImageUrl());
+            existing.setUpdatedAt(LocalDateTime.now());
+            return carouselRepository.save(existing);
+        }
+
+        // Prevent duplicate submissions or already playing
         carouselRepository.findFirstByDishIdAndStatusIn(dishId, Arrays.asList("PENDING", "APPROVED"))
                 .ifPresent(c -> {
-                    throw new RuntimeException("该菜品已提交或正在播放");
+                    throw new BusinessException(400, "This dish has already been submitted or is currently playing");
                 });
         Carousel c = new Carousel();
         c.setShop(shop);
@@ -82,9 +107,9 @@ public class CarouselServiceImpl implements CarouselService {
     @Override
     @Transactional
     public Carousel approve(Long id, Long reviewerId, int maxPlaying) {
-        Carousel c = carouselRepository.findById(id).orElseThrow(() -> new RuntimeException("记录不存在"));
+        Carousel c = carouselRepository.findById(id).orElseThrow(() -> new RuntimeException("Record not found"));
         if (carouselRepository.countByStatus("APPROVED") >= maxPlaying) {
-            throw new RuntimeException("播放条数已达上限");
+            throw new RuntimeException("Carousel playing limit reached");
         }
         User reviewer = reviewerId == null ? null : userRepository.findById(reviewerId).orElse(null);
         c.setStatus("APPROVED");
@@ -97,7 +122,7 @@ public class CarouselServiceImpl implements CarouselService {
     @Override
     @Transactional
     public Carousel reject(Long id, Long reviewerId) {
-        Carousel c = carouselRepository.findById(id).orElseThrow(() -> new RuntimeException("记录不存在"));
+        Carousel c = carouselRepository.findById(id).orElseThrow(() -> new RuntimeException("Record not found"));
         User reviewer = reviewerId == null ? null : userRepository.findById(reviewerId).orElse(null);
         c.setStatus("REJECTED");
         c.setReviewer(reviewer);
@@ -109,7 +134,7 @@ public class CarouselServiceImpl implements CarouselService {
     @Override
     @Transactional
     public Carousel stop(Long id, Long reviewerId) {
-        Carousel c = carouselRepository.findById(id).orElseThrow(() -> new RuntimeException("记录不存在"));
+        Carousel c = carouselRepository.findById(id).orElseThrow(() -> new RuntimeException("Record not found"));
         User reviewer = reviewerId == null ? null : userRepository.findById(reviewerId).orElse(null);
         c.setStatus("STOPPED");
         c.setReviewer(reviewer);
